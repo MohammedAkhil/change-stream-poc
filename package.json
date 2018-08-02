@@ -1,0 +1,21 @@
+{
+  "name": "poc-changestream",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "csv-generator": "^1.0.4",
+    "express": "^4.16.3",
+    "mongodb": "^3.1.1",
+    "mongodb-topology-manager": "^2.0.0",
+    "mongoose": "^5.2.6",
+    "socket.io": "^1.7.3"
+  }
+}
