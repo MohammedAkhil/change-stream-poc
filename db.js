@@ -7,7 +7,7 @@ class Database {
 
   _connect() {
     mongoose
-      .connect('mongodb://localhost:31000/' + 'test?replicaSet=rs0')
+      .connect('mongodb://localhost:31000/' + 'poc?replicaSet=rs0')
       .then(() => {
         console.log('Database connection successful');
       })
