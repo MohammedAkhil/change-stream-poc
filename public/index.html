@@ -1,0 +1,100 @@
+<!DOCTYPE HTML>
+<html>
+
+<head>
+	<meta content="text/html;charset=utf-8" http-equiv="Content-Type">
+	<meta content="utf-8" http-equiv="encoding">
+	<title>Streaming data</title>
+
+	<style type="text/css">
+		body,
+		html,
+		select {
+			font: 10pt sans-serif;
+		}
+	</style>
+
+	<script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
+	<script src="vis/vis.js"></script>
+	<link href="vis/vis-timeline-graph2d.min.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body>
+	<h2>Streaming data</h2>
+
+	<div id="visualization"></div>
+
+	<script type="text/javascript">
+		// create a graph2d with an (currently empty) dataset
+		var container = document.getElementById('visualization');
+		var dataset = new vis.DataSet();
+
+		var options = {
+			start: vis.moment().add(-30, 'seconds'), // changed so its faster
+			end: vis.moment(),
+			dataAxis: {
+				left: {
+					range: {
+						min: -10, max: 10
+					}
+				}
+			},
+			drawPoints: {
+				style: 'circle' // square, circle
+			},
+			shaded: {
+				orientation: 'bottom' // top, bottom
+			}
+		};
+		var graph2d = new vis.Graph2d(container, dataset, options);
+
+		// a function to generate data points
+		function y(x) {
+			return (Math.sin(x / 2) + Math.cos(x / 4)) * 5;
+		}
+
+		function renderStep() {
+			// move the window (you can think of different strategies).
+			var now = vis.moment();
+			var range = graph2d.getWindow();
+			var interval = range.end - range.start;
+			// continuously move the window
+			graph2d.setWindow(now - interval, now, { animation: false });
+			requestAnimationFrame(renderStep);
+		}
+		renderStep();
+
+		const socket = io();
+		socket.on("add", addDataPoint)
+
+		function sendData() {
+			const now = vis.moment();
+			socket.emit('point', {
+				x: now,
+				y: y(now / 1000)
+			});
+		}
+
+		setInterval(sendData, 2000)
+
+		/**
+		 * Add a new datapoint to the graph
+		 */
+		function addDataPoint(point) {
+			// add a new data point to the dataset
+			dataset.add(point);
+
+			// remove all data points which are no longer visible
+			var range = graph2d.getWindow();
+			var interval = range.end - range.start;
+			var oldIds = dataset.getIds({
+				filter: function (item) {
+					return item.x < range.start - interval;
+				}
+			});
+			dataset.remove(oldIds);
+		}
+	</script>
+</body>
+
+</html>
