@@ -17,12 +17,6 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use('/chat/', chat);
 app.use('/graph/', graph);
 
-app.get('/email', (req, res) => {
-  emailExistence.check('smakhil@gmail.com', function(error, response) {
-    console.log('res: ' + response);
-  });
-});
-
 app.get('/', function(req, res) {
   res.sendFile(__dirname + '/public/index.html');
 });
