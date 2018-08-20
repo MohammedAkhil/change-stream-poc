@@ -1,23 +1,22 @@
-const GraphSchema = require('./schema');
-const logger = require('../utils/logger').logger;
 const express = require('express');
 const router = express.Router();
+const chatSchema = require('./schema');
 const Event = require('../event/');
 
 router.post('/add/', async (req, res) => {
-  await GraphSchema.create(req.body);
+  await chatSchema.create(req.body);
   res.send({ success: 'ok' });
 });
 
 router.get('/', (req, res) => {
-  new Event(req, res, 'graph');
+  new Event(req, res, 'chat');
 });
 
 (async function initListener() {
-  GraphSchema.watch().on('change', data => {
+  console.log('started');
+  chatSchema.watch().on('change', data => {
     if (data.operationType === 'insert') {
-      const point = { x: data.fullDocument.x, y: data.fullDocument.y };
-      Event.pushMessage(point, 'graph');
+      Event.pushMessage(data.fullDocument.message, 'chat');
     }
   });
 })();
