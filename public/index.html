@@ -14,7 +14,7 @@
 		}
 	</style>
 
-	<script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
+	<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
 	<script src="vis/vis.js"></script>
 	<link href="vis/vis-timeline-graph2d.min.css" rel="stylesheet" type="text/css" />
 </head>
@@ -50,6 +50,7 @@
 
 		// a function to generate data points
 		function y(x) {
+			console.log(x);
 			return (Math.sin(x / 2) + Math.cos(x / 4)) * 5;
 		}
 
@@ -64,15 +65,24 @@
 		}
 		renderStep();
 
-		const socket = io();
-		socket.on("add", addDataPoint)
+		var source = new EventSource("/graph/");
+		source.onmessage = function (e) {
+
+		}
+		source.addEventListener("graph", function (e) {
+			const point = JSON.parse(e.data)
+			addDataPoint(point)
+		}, false);
 
 		function sendData() {
 			const now = vis.moment();
-			socket.emit('point', {
+			const data = {
 				x: now,
 				y: y(now / 1000)
-			});
+			};
+			axios.post('http://localhost:3000/graph/add/', data)
+				.then(res => { console.log('success'); })
+				.catch(err => console.log(err))
 		}
 
 		setInterval(sendData, 2000)
