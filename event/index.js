@@ -29,10 +29,6 @@ class Event {
     res.write('\n');
   }
 
-  getType() {
-    return this.type;
-  }
-
   onAdd(res, type) {
     ++clientId;
     clients[clientId] = res;
@@ -46,15 +42,19 @@ class Event {
   }
 
   static pushMessage(message, type) {
-    console.log('Clients: ' + Object.keys(clients) + ' <- ' + message);
-    Object.keys(clients)
-      .filter(clientId => {
-        return clients[clientId].type === type;
-      })
-      .forEach(clientId => {
+    if (message) {
+      const byType = clientId => clients[clientId].type === type;
+      const writeEventType = clientId => {
         clients[clientId].write('event: ' + type + '\n');
-        clients[clientId].write('data: ' + JSON.stringify(message) + '\n\n'); // <- Push a message to a single attached client
-      });
+        return clientId;
+      };
+      const writeEventContent = clientId =>
+        clients[clientId].write('data: ' + JSON.stringify(message) + '\n\n');
+      Object.keys(clients)
+        .filter(byType)
+        .map(writeEventType)
+        .forEach(writeEventContent);
+    }
   }
 }
 

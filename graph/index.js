@@ -15,11 +15,17 @@ router.get('/', (req, res) => {
 
 (async function initListener() {
   GraphSchema.watch().on('change', data => {
-    if (data.operationType === 'insert') {
-      const point = { x: data.fullDocument.x, y: data.fullDocument.y };
-      Event.pushMessage(point, 'graph');
+    if (isInserted(data)) {
+      Event.pushMessage(createPoint(data), 'graph');
     }
   });
 })();
+
+const isInserted = data => data.operationType === 'insert';
+
+const createPoint = data => ({
+  x: data.fullDocument.x,
+  y: data.fullDocument.y,
+});
 
 module.exports = router;
